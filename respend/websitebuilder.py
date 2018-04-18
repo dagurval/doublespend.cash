@@ -127,8 +127,8 @@ def generate_respend_data():
 # Generates a short, colorful hash
 def shortenhash(txid):
     prefix = txid[0:2]
-    suffix = txid[-3:-1]
-    middle = txid[2:-3]
+    suffix = txid[-2:]
+    middle = txid[2:-2]
 
     html = prefix;
     while len(middle):
@@ -158,8 +158,8 @@ def gen_pagination(curr, total):
     items = [ ]
     items.append({ "title" : "Previous", "url" : None if curr == 1 else gen_url(curr - 1) })
 
-    i = curr - 5 
-    while len(items) < 11:
+    i = curr - 3 
+    while len(items) < 9:
         if i < 1:
             i += 1
             continue
@@ -199,7 +199,7 @@ def build_website():
             fh.write(html)
         
         if p == 0:
-            # also render page 1 as inde.html
+            # also render page 1 as index.html
             with open(os.path.join("site", "index.html"), "w") as fh:
                 fh.write(html)
 
