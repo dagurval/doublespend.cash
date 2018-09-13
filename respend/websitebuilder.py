@@ -206,3 +206,11 @@ def build_website():
             with open(os.path.join("site", "index.html"), "w") as fh:
                 fh.write(html)
 
+    # create a gz dump
+    print("generating gz dump")
+    import tarfile
+    gz = tarfile.open("site/txdata.tar.gz", "w:gz")
+    gz.add("txdata")
+    gz.close()
+    print("done")
+
