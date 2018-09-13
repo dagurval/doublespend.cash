@@ -54,6 +54,7 @@ def get_outputs(tx):
 
 def find_tags(fee_per_byte, outputs):
     tags = set()
+    
     if fee_per_byte < 1.0:
         tags.add("lowfee")
 
@@ -82,18 +83,15 @@ def find_tags(fee_per_byte, outputs):
 def extract_tx_info(tx):
     fee_per_byte = calc_fee(tx)
     outputs = get_outputs(tx)
-
-    tags = []
-    if fee_per_byte < 1.0:
-        tags.append("lowfee")
+    inputs = get_inputs(tx)
 
     return {
         "txid" : tx["txid"],
         "first_seen" : tx["first_seen"],
         "fee" : fee_per_byte,
-        "inputs" : get_inputs(tx),
+        "inputs" : inputs,
         "outputs" : outputs,
-        "tags" : find_tags(fee_per_byte, outputs),
+        "tags" : find_tags(fee_per_byte, outputs)
     }
 
 def seconds_between(first, second):
@@ -112,8 +110,13 @@ def generate_respend_data():
     respends = [ ]
     for r in respends_raw:
 
-        first = extract_tx_info(r["first"])
-        second = extract_tx_info(r["second"])
+        try:
+            first = extract_tx_info(r["first"])
+            second = extract_tx_info(r["second"])
+        except Exception as e:
+            print(str(e))
+            print("skiping respend")
+            continue
 
         respends.append({
             "first" : first,
