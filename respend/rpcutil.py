@@ -21,6 +21,6 @@ def connection():
     global conn
     return conn
 
-@lru_cache(maxsize = 1024)
+@lru_cache(maxsize = 128)
 def get_cached_tx(txid):
     return connection().getrawtransaction(txid, 1)

@@ -2,10 +2,13 @@ from respend.txdata import list_respends, load_respend, respend_id
 from respend.rpcutil import get_cached_tx
 import math
 import datetime
+from functools import lru_cache
 
 ENTRIES_PER_PAGE = 10
    
-def get_vout_value(tx, n):
+@lru_cache(maxsize = 65536)
+def get_vout_value(txid, n):
+    tx = get_cached_tx(txid)
     for vout in tx["vout"]:
         if vout["n"] == n:
             return vout["value"]
@@ -13,8 +16,7 @@ def get_vout_value(tx, n):
 def sum_in_value(tx):
     value = 0
     for in_ in tx["vin"]:
-        tx = get_cached_tx(in_["txid"])
-        value += get_vout_value(tx, in_["vout"])
+        value += get_vout_value(in_["txid"], in_["vout"])
     return float(value)
 
 def sum_out_value(tx):
@@ -33,7 +35,7 @@ def get_inputs(tx):
     inputs = [ ]
     for in_ in tx['vin']:
         txid = in_['txid']
-        value = get_vout_value(get_cached_tx(txid), in_['vout'])
+        value = get_vout_value(txid, in_['vout'])
         inputs.append({
             "txid" : txid,
             "value" : value 
@@ -108,7 +110,8 @@ def generate_respend_data():
 
     # Extract the information we want
     respends = [ ]
-    for r in respends_raw:
+    while len(respends_raw):
+        r = respends_raw.pop(0)
 
         try:
             first = extract_tx_info(r["first"])
@@ -186,9 +189,11 @@ def build_website():
     env.filters['bch'] = amount_filter
 
     template = env.get_template("base.html")
+    print("generating data")
     data = generate_respend_data()
     pages = math.ceil(len(data) / ENTRIES_PER_PAGE)
 
+    print("rendering website")
     for p in range(pages):
         html = template.render(
                 page = p + 1,

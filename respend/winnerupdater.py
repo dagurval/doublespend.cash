@@ -1,8 +1,13 @@
 from respend.rpcutil import connection, JSONRPCException
 from respend.txdata import list_respends, load_respend, store_respend, has_winner
 
+# Force website update at scripts first start.
+first_run = True
+
 def update_winners():
-    changes = False
+    global first_run
+    changes = first_run
+    first_run = True
     print("Updating winners")
 
     for respend in list_respends():

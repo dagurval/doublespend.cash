@@ -6,7 +6,11 @@ class BlockchainChecker:
         self.tip = None
 
     def check(self):
-        new_tip = connection().getbestblockhash()
+        try:
+            new_tip = connection().getbestblockhash()
+        except Exception as e:
+            print("tip check failed: " + str(e))
+            return False
         if new_tip == self.tip:
             return False
         print("New blockchain tip: %s" % new_tip)
